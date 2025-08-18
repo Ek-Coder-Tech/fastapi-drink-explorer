@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Drink Explorer – API Driven Gallery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0 20px;
+        }
+        header {
+            text-align: center;
+            padding: 30px 0 10px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: #2c3e50;
+        }
+        header p {
+            margin-top: 5px;
+            color: #555;
+            font-size: 1rem;
+        }
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        #search {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            min-width: 200px;
+        }
+        #searchBtn, #sort {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background: #fff;
+            cursor: pointer;
+        }
+        #searchBtn {
+            border: none;
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 10px 14px;
+            transition: background-color 0.2s;
+        }
+        #searchBtn:hover {
+            background-color: #34495e;
+        }
+        #gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .drink-card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .drink-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        .drink-card img {
+            width: 100%;
+            display: block;
+            object-fit: cover;
+        }
+        .drink-card p {
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        #pagination {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        #pagination button {
+            margin: 0 5px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            background-color: #2c3e50;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #pagination button:hover:not(:disabled) {
+            background-color: #34495e;
+        }
+        #pagination button:disabled {
+            background-color: #95a5a6;
+            cursor: default;
+        }
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #777;
+            font-size: 0.9rem;
+        }
+        section#description {
+            max-width: 800px;
+            margin: 0 auto 30px;
+            text-align: center;
+            color: #555;
+            font-size: 1rem;
+        }
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            padding: 40px 16px;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 900px;
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        @media (min-width: 700px) {
+            .modal-content {
+                grid-template-columns: 1fr 1.4fr;
+            }
+        }
+        .modal-left img {
+            width: 100%;
+            max-height: 70vh;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+        }
+        .modal-right {
+            max-height: 75vh;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .modal-content .close {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            z-index: 2;
+        }
+        .modal-content .close:hover { color: #000; }
+        #modalName { margin: 0 0 6px; }
+        #modalCategory {
+            margin: 6px 0 12px;
+            font-style: italic;
+            color: #666;
+        }
+        #modalInstructions {
+            margin: 10px 0 12px;
+            line-height: 1.5;
+        }
+        #modalIngredients {
+            margin-top: 8px;
+            padding-left: 18px;
+        }
+        #modalIngredients li { margin-bottom: 4px; }
+
+        /* MOBILE OPTIMIZATION */
+        @media (max-width: 600px) {
+            #gallery {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+            .drink-card p {
+                font-size: 0.9rem;
+            }
+            #controls {
+                gap: 8px;
+            }
+            #search, #searchBtn, #sort {
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+            .modal-content {
+                padding: 12px;
+            }
+            .modal-left img {
+                max-height: 50vh;
+            }
+            .modal-right {
+                max-height: 55vh;
+                padding-right: 2px;
+            }
+        }
+
+        /* DESKTOP ENHANCEMENT */
+        @media (min-width: 1200px) {
+            #gallery {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            .drink-card p {
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Drink Explorer</h1>
+        <p>Interactive gallery powered by TheCocktailDB API</p>
+    </header>
+
+    <section id="description">
+        <p>This project demonstrates a client-relevant API integration using FastAPI. Features include JSON endpoint <code>/drinks</code>, search, pagination, sorting, and interactive modals for drinks fetched from a public API. Built with FastAPI (Python), HTML, CSS, and JavaScript.</p>
+    </section>
+
+    <div id="controls">
+        <input type="text" id="search" placeholder="Search drinks by name..." />
+        <button id="searchBtn" aria-label="Search">Search</button>
+        <select id="sort" aria-label="Sort">
+            <option value="asc">Sort A → Z</option>
+            <option value="desc">Sort Z → A</option>
+        </select>
+    </div>
+
+    <div id="gallery"></div>
+    <div id="pagination"></div>
+
+    <!-- Modal -->
+    <div id="drinkModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+        <div class="modal-content">
+            <span class="close" aria-label="Close">&times;</span>
+            <div class="modal-left">
+                <img id="modalImage" src="" alt="Drink image" />
+            </div>
+            <div class="modal-right">
+                <h2 id="modalName"></h2>
+                <p id="modalCategory"></p>
+                <p id="modalInstructions"></p>
+                <h3>Ingredients</h3>
+                <ul id="modalIngredients"></ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 Eric KM – FastAPI Portfolio Project
+    </footer>
+
+    <script>
+        let drinksData = [];
+        let currentPage = 1;
+        const itemsPerPage = 6;
+        const fallbackImage = "https://via.placeholder.com/300x300.png?text=No+Image";
+
+        const modal = document.getElementById("drinkModal");
+        const modalImage = document.getElementById("modalImage");
+        const modalName = document.getElementById("modalName");
+        const modalCategory = document.getElementById("modalCategory");
+        const modalInstructions = document.getElementById("modalInstructions");
+        const modalIngredients = document.getElementById("modalIngredients");
+        const modalClose = document.querySelector(".modal-content .close");
+
+        const searchInput = document.getElementById("search");
+        const searchBtn = document.getElementById("searchBtn");
+        const sortSelect = document.getElementById("sort");
+
+        fetch("/drinks")
+            .then(res => res.json())
+            .then(data => {
+                drinksData = data.drinks;
+                displayDrinks();
+                setupPagination();
+            })
+            .catch(err => console.error("Error fetching drinks:", err));
+
+        function sortDrinks(drinks) {
+            const sortOrder = sortSelect.value;
+            return drinks.sort((a, b) => {
+                if (a.name < b.name) return sortOrder === "asc" ? -1 : 1;
+                if (a.name > b.name) return sortOrder === "asc" ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function getFiltered() {
+            const term = searchInput.value.trim().toLowerCase();
+            return drinksData.filter(d => d.name.toLowerCase().includes(term));
+        }
+
+        function displayDrinks() {
+            const gallery = document.getElementById("gallery");
+            gallery.innerHTML = "";
+
+            const filtered = sortDrinks(getFiltered());
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageDrinks = filtered.slice(start, end);
+
+            pageDrinks.forEach(drink => {
+                const card = document.createElement("div");
+                card.className = "drink-card";
+
+                const img = document.createElement("img");
+                img.src = drink.image || fallbackImage;
+                img.alt = drink.name;
+                img.onerror = () => { img.src = fallbackImage; };
+
+                const name = document.createElement("p");
+                name.textContent = drink.name;
+
+                card.appendChild(img);
+                card.appendChild(name);
+                gallery.appendChild(card);
+
+                card.addEventListener("click", () => openDrinkModal(drink.id));
+            });
+        }
+
+        function setupPagination() {
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = "";
+
+            const totalPages = Math.ceil(getFiltered().length / itemsPerPage);
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement("button");
+                btn.textContent = i;
+                btn.disabled = (i === currentPage);
+                btn.addEventListener("click", () => {
+                    currentPage = i;
+                    displayDrinks();
+                    setupPagination();
+                });
+                pagination.appendChild(btn);
+            }
+        }
+
+        function openDrinkModal(drinkId) {
+            modalImage.src = fallbackImage;
+            modalName.textContent = "";
+            modalCategory.textContent = "";
+            modalInstructions.textContent = "";
+            modalIngredients.innerHTML = "";
+
+            fetch(`/drink/${drinkId}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Failed to fetch drink details");
+                    return res.json();
+                })
+                .then(drink => {
+                    modalImage.src = drink.image || fallbackImage;
+                    modalImage.onerror = () => { modalImage.src = fallbackImage; };
+                    modalName.textContent = drink.name;
+                    modalCategory.textContent = `Category: ${drink.category || "N/A"}`;
+                    modalInstructions.textContent = drink.instructions || "No instructions available.";
+
+                    if (Array.isArray(drink.ingredients) && drink.ingredients.length) {
+                        drink.ingredients.forEach(item => {
+                            const li = document.createElement("li");
+                            li.textContent = item;
+                            modalIngredients.appendChild(li);
+                        });
+                    } else {
+                        const li = document.createElement("li");
+                        li.textContent = "No ingredients listed.";
+                        modalIngredients.appendChild(li);
+                    }
+
+                    modal.style.display = "block";
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Error loading drink details. Please try again.");
+                });
+        }
+
+        // ✅ Search button and Enter key only
+        searchBtn.addEventListener("click", () => {
+            currentPage = 1;
+            displayDrinks();
+            setupPagination();
+        });
+        searchInput.addEventListener("keyup", (e) => {
+            if (e.key === "Enter") {
+                currentPage = 1;
+                displayDrinks();
+                setupPagination();
+            }
+        });
+
+        sortSelect.addEventListener("change", () => {
+            currentPage = 1;
+            displayDrinks();
+            setupPagination();
+        });
+
+        modalClose.onclick = () => modal.style.display = "none";
+        window.onclick = (event) => { if (event.target === modal) modal.style.display = "none"; };
+        window.addEventListener("keydown", (e) => { if (e.key === "Escape") modal.style.display = "none"; });
+    </script>
+</body>
+</html>
