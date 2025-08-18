@@ -58,7 +58,7 @@ drink-explorer/
 
 ## 👤 Author
 
-**Eric Mutisya**  
+**Eric M.**  
 Python Developer & Web Automation Freelancer  
 [View My GitHub Projects](https://github.com/Ek-Coder-Tech)
 
