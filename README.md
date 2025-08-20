@@ -51,7 +51,12 @@ drink-explorer/
 
 ## 📸 Project Screenshots
 
+Main gallery with search functionality and drink cards;
+
 ![Main gallery with search functionality and drink cards](screenshot-gallery-search.png)
+
+Interactive modal with drink details:
+
 ![Interactive modal with drink details](screenshot-modal.png)
 
 ---
