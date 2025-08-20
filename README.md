@@ -1,6 +1,6 @@
 # Drink Explorer - FastAPI Project
 
-This project demonstrates a client-relevant API integration using FastAPI. It features a JSON endpoint `/drinks`, dynamic search, pagination, sorting, and interactive modals for drinks fetched from a public API. Built with FastAPI (Python), HTML, CSS, and JavaScript.
+Drink Explorer showcases a practical FastAPI integration with a public API. The project features a JSON endpoint <code>/drinks</code> (e.g., <code>/drinks?search=apple</code>), a dynamic gallery displaying drink cards with images and names, search and sort capabilities, pagination (6 drinks per page), and interactive modals presenting full images, categories, instructions, and ingredients. Built with FastAPI, HTML, CSS, and JavaScript, it demonstrates a complete client-relevant workflow for API-driven interfaces.
 
 ---
 
